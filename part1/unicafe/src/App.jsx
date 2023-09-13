@@ -1,22 +1,26 @@
 import { useState } from "react";
 
-const Statistics = ({statistics}) => {
+const Statistics = ({ statistics }) => {
 	return (
 		<>
 			<h1>Statistics</h1>
-			<p>
-				Good {statistics.good}
-				<br />
-				Neutral {statistics.neutral}
-				<br />
-				Bad {statistics.bad}
-				<br />
-				all {statistics.total}
-				<br />
-				average {statistics.avarage}
-				<br />
-				positive {statistics.positive}
-			</p>
+			{statistics.all === 0 ? (
+				<p>No feedback given</p>
+			) : (
+				<p>
+					Good {statistics.good}
+					<br />
+					Neutral {statistics.neutral}
+					<br />
+					Bad {statistics.bad}
+					<br />
+					all {statistics.all}
+					<br />
+					average {statistics.avarage}
+					<br />
+					positive {statistics.positive}
+				</p>
+			)}
 		</>
 	);
 };
@@ -27,9 +31,9 @@ const App = () => {
 	const [neutral, setNeutral] = useState(0);
 	const [bad, setBad] = useState(0);
 
-	const total = good + neutral + bad;
-	const avarage = total === 0 ? 0 : (good * 1 + neutral * 0 + bad * -1) / total;
-	const positive = total === 0 ? 0 : (good / total) * 100;
+	const all = good + neutral + bad;
+	const avarage = all === 0 ? 0 : (good * 1 + neutral * 0 + bad * -1) / all;
+	const positive = all === 0 ? 0 : (good / all) * 100;
 
 	return (
 		<div>
@@ -39,7 +43,7 @@ const App = () => {
 				<button onClick={() => setNeutral(neutral + 1)}>neutral</button>
 				<button onClick={() => setBad(bad + 1)}>bad</button>
 			</span>
-      <Statistics statistics={{good, neutral, bad, avarage, positive}}/>
+			<Statistics statistics={{ good, neutral, bad, avarage, positive, all }} />
 		</div>
 	);
 };
