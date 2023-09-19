@@ -1,12 +1,12 @@
-export const Persons = ({ persons }) => {
+export const Persons = ({ persons, onDelete }) => {
 	return (
 		<table>
 			<tbody>
 				{persons.map((person) => (
 					<PersonRow
 						key={person.id}
-						name={person.name}
-						number={person.number}
+						person={person}
+						onDelete={onDelete}
 					/>
 				))}
 			</tbody>
@@ -14,11 +14,12 @@ export const Persons = ({ persons }) => {
 	);
 };
 
-const PersonRow = ({ name, number }) => {
+const PersonRow = ({ person, onDelete }) => {
 	return (
 		<tr>
-			<td>{name}</td>
-			<td>{number}</td>
+			<td>{person.name}</td>
+			<td>{person.number}</td>
+			<td><button onClick={() => onDelete(person)}>delete</button></td>
 		</tr>
 	);
 };
