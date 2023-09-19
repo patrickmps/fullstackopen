@@ -3,12 +3,14 @@ import personService from "./services/personService";
 import { Filter } from "./components/Filter";
 import { PersonForm } from "./components/PersonForm";
 import { Persons } from "./components/Persons";
+import { Notification } from "./components/Notification";
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState("");
 	const [newNumber, setNewNumber] = useState("");
 	const [search, setSearch] = useState("");
+	const [message, setMessage] = useState(null);
 
 	const showPersons =
 		search.trim().length === 0
@@ -42,18 +44,38 @@ const App = () => {
 				)
 			) {
 				const updateNumber = { ...equalObjects[0], number: newPerson.number };
-				personService
-					.update(updateNumber.id, updateNumber)
-					.then((response) =>
-						setPersons(
-							persons.map((p) => (p.id !== updateNumber.id ? p : response))
-						)
+				personService.update(updateNumber.id, updateNumber).then((response) => {
+					setPersons(
+						persons.map((p) => (p.id !== updateNumber.id ? p : response))
 					);
+					setMessage({
+						text: `${updateNumber.name}'s number updated.`,
+						success: true,
+					});
+					setTimeout(() => {
+						setMessage(null);
+					}, 5000);
+				}).catch(() => {
+					setMessage({
+						text: `Information of ${updateNumber.name} has already removed from server.`,
+						success: false,
+					});
+					setTimeout(() => {
+						setMessage(null);
+					}, 5000);
+				});
 			}
 		} else {
-			personService
-				.create(newPerson)
-				.then((response) => setPersons(persons.concat(response)));
+			personService.create(newPerson).then((response) => {
+				setPersons(persons.concat(response));
+				setMessage({
+					text: `Added ${response.name}'s number.`,
+					success: true,
+				});
+				setTimeout(() => {
+					setMessage(null);
+				}, 5000);
+			});
 			setNewName("");
 			setNewNumber("");
 		}
@@ -83,6 +105,7 @@ const App = () => {
 	return (
 		<div>
 			<h2>Phonebook</h2>
+			<Notification message={message} />
 			<Filter value={search} onChange={handleSearchChange} />
 
 			<h2>Add a new</h2>
