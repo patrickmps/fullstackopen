@@ -1,0 +1,18 @@
+div {
+  display: flex;
+  flex-direction: column;
+  width: 30rem;
+  font-weight: 600;
+  color: #e4e4e4;
+}
+
+input {
+  display: flex;
+  height: 1.6rem;
+  align-items: center;
+  border-radius: 8px;
+  margin-top: 3px;
+  padding-left: 10px;
+  border: solid 2px #c0c0c0;
+  background-color: #9c9c9c;
+}
