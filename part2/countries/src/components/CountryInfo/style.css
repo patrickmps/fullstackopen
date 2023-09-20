@@ -1,3 +1,7 @@
 span {
   margin-bottom: 10px;
 }
+
+#weather-img {
+  width: 10rem;
+}
