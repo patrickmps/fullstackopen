@@ -8,7 +8,9 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "node --watch index.js",
 		"build:ui": "rm -rf build && cd ../../part2/phonebook && npm run build && cp -r build ../../part3/phonebook-bakcend",
-		"deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git pull && git push"
+		"deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git pull && git push",
+		"lint": "eslint .",
+		"lint-fix": "eslint --fix ."
 	},
 	"author": "Patrick Mota",
 	"license": "ISC",
@@ -18,5 +20,10 @@
 		"express": "^4.18.2",
 		"mongoose": "^7.5.3",
 		"morgan": "^1.10.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.50.0",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-plugin-import": "^2.28.1"
 	}
 }
