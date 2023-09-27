@@ -44,40 +44,54 @@ const App = () => {
 				)
 			) {
 				const updateNumber = { ...equalObjects[0], number: newPerson.number };
-				personService.update(updateNumber.id, updateNumber).then((response) => {
-					setPersons(
-						persons.map((p) => (p.id !== updateNumber.id ? p : response))
-					);
+				personService
+					.update(updateNumber.id, updateNumber)
+					.then((response) => {
+						setPersons(
+							persons.map((p) => (p.id !== updateNumber.id ? p : response))
+						);
+						setMessage({
+							text: `${updateNumber.name}'s number updated.`,
+							success: true,
+						});
+						setTimeout(() => {
+							setMessage(null);
+						}, 5000);
+					})
+					.catch((error) => {
+						setMessage({
+							text: error.response.data.error,
+							success: false,
+						});
+						setTimeout(() => {
+							setMessage(null);
+						}, 5000);
+					});
+			}
+		} else {
+			personService
+				.create(newPerson)
+				.then((response) => {
+					setPersons(persons.concat(response));
 					setMessage({
-						text: `${updateNumber.name}'s number updated.`,
+						text: `Added ${response.name}'s number.`,
 						success: true,
 					});
 					setTimeout(() => {
 						setMessage(null);
 					}, 5000);
-				}).catch(() => {
+					setNewName("");
+					setNewNumber("");
+				})
+				.catch((error) => {
 					setMessage({
-						text: `Information of ${updateNumber.name} has already removed from server.`,
+						text: error.response.data.error,
 						success: false,
 					});
 					setTimeout(() => {
 						setMessage(null);
 					}, 5000);
 				});
-			}
-		} else {
-			personService.create(newPerson).then((response) => {
-				setPersons(persons.concat(response));
-				setMessage({
-					text: `Added ${response.name}'s number.`,
-					success: true,
-				});
-				setTimeout(() => {
-					setMessage(null);
-				}, 5000);
-			});
-			setNewName("");
-			setNewNumber("");
 		}
 	};
 
