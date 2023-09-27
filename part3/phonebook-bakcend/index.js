@@ -45,10 +45,11 @@ app.delete("/api/persons/:id", (req, res, next) => {
 })
 
 app.get("/info", (req, res) =>
-  res.send(`
-  <p>Phonebook has info for ${persons.length} people</p>
+  Person.find({}).then(result => res.send(`
+  <p>Phonebook has info for ${result.length} people</p>
   <p>${new Date(Date.now()).toString()}</p>
-`))
+`)))
+
 
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
