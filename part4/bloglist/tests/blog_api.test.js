@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const app = require('../app');
 const Blog = require('../models/blog');
 const User = require('../models/user')
@@ -10,10 +11,36 @@ const api = supertest(app);
 
 beforeEach(async () => {
   await Blog.deleteMany({});
+  await User.deleteMany({});
+
+  const newUser = {
+    username: 'root',
+    name: 'Superuser',
+    password: 'salainen',
+  }
+
+  await api
+    .post('/api/users')
+    .send(newUser)
+
+  const { body } = await api
+    .post('/api/login')
+    .send({
+      username: 'root',
+      password: 'salainen'
+    })
+
+  const { id } = jwt.verify(body.token, process.env.SECRET)
+
+  const user = await User.findById(id)
 
   const blogObjects = helper.initialBlogs
     .map((blog) => new Blog(blog));
-  const promiseArray = blogObjects.map((blog) => blog.save());
+
+  const promiseArray = blogObjects.map(async (blog) => {
+    blog.user = user.id
+    blog.save()
+  });
   await Promise.all(promiseArray);
 });
 
@@ -43,6 +70,12 @@ describe('when there is initially some blogs saved', () => {
 
 describe('addition of a new blog', () => {
   test('a valid blog can be added', async () => {
+
+    const { body } = await api.post('/api/login')
+      .send({
+        username: 'root',
+        password: 'salainen'
+      })
     const newBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
@@ -52,6 +85,7 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${body.token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -67,6 +101,12 @@ describe('addition of a new blog', () => {
   });
 
   test('blog without likes is not added', async () => {
+    const { body } = await api.post('/api/login')
+      .send({
+        username: 'root',
+        password: 'salainen'
+      })
+
     const newBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
@@ -75,6 +115,7 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${body.token}`)
       .send(newBlog)
       .expect(201);
 
@@ -84,18 +125,52 @@ describe('addition of a new blog', () => {
   });
 
   test('a blog can\'t be added without title or url', async () => {
+    const { body } = await api.post('/api/login')
+      .send({
+        username: 'root',
+        password: 'salainen'
+      })
+
     const newBlog = {
       title: '',
       author: 'Robert C. Martin',
       url: '',
       likes: 2,
     };
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api.post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `Bearer ${body.token}`)
+      .expect(400);
+  });
+
+  test('adding a new blog will fail if there is no token', async () => {
+    const { body } = await api.post('/api/login')
+      .send({
+        username: 'root',
+        password: 'salainen'
+      })
+
+    const newBlog = {
+      title: 'First class tests',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+      likes: 5
+    };
+    await api.post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `Bearer `)
+      .expect(401);
   });
 })
 
 describe('deletion of a blog', () => {
   test('a valid blog can be deleted', async () => {
+    const { body } = await api.post('/api/login')
+      .send({
+        username: 'root',
+        password: 'salainen'
+      })
+
     let blogsAtEnd = await helper.blogsInDb();
     const blogsId = blogsAtEnd.map((b) => b.id);
 
@@ -103,6 +178,7 @@ describe('deletion of a blog', () => {
 
     await api
       .delete(`/api/blogs/${toBeDeleted}`)
+      .set('Authorization', `Bearer ${body.token}`)
       .expect(204)
 
     blogsAtEnd = await helper.blogsInDb();
@@ -124,7 +200,7 @@ describe('updating a blog', () => {
     }
 
     const blogsAtEnd = await helper.blogsInDb()
-    const toBeUpdated = blogsAtEnd[0]
+    const toBeUpdated = blogsAtEnd.find(b => b)
 
     const { body: result } = await api.put(`/api/blogs/${toBeUpdated.id}`).send(blog).expect(200);
 
