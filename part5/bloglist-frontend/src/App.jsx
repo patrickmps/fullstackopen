@@ -89,12 +89,9 @@ const App = () => {
 		try {
 			await blogService.update(updateBlog?.id, { likes: updateBlog.likes + 1 });
 			setBlogs(
-				blogs.map((b) => {
-					if (b.id === updateBlog?.id) {
-						b.likes += 1;
-					}
-					return b;
-				})
+				blogs.map((b) =>
+					b.id === updateBlog.id ? { ...b, likes: b.likes + 1 } : b
+				)
 			);
 		} catch (exception) {
 			setMessage({ text: exception.message, success: false });

@@ -32,9 +32,11 @@ const Blog = ({ blog, user, removeBlog, updateBlog }) => {
 			<span>
 				{blog.title} {blog.author}
 			</span>
-			<button onClick={toggleVisibility}>{visible ? "hide" : "view"}</button>
+			<button onClick={toggleVisibility} id="toggle-btn">
+				{visible ? "hide" : "view"}
+			</button>
 			<br />
-			<div style={showWhenVisible}>
+			<div style={showWhenVisible} id="hidden">
 				<span>{blog.url}</span>
 				<br />
 				<span>
