@@ -13,5 +13,9 @@ export const Notification = ({ message }) => {
 		marginBottom: "10px",
 	};
 
-	return <div style={style}>{message.text}</div>;
+	return (
+		<div style={style} className="notification">
+			{message.text}
+		</div>
+	);
 };
