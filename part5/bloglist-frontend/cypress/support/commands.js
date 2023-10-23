@@ -26,12 +26,13 @@
 
 Cypress.Commands.add('login', ({ username, password }) => {
   cy.request('POST', 'http://localhost:3001/api/login', {
-    username, password
+    username,
+    password
   }).then(({ body }) => {
-    localStorage.setItem('loggedBlogListappUser', JSON.stringify(body))
-    cy.visit('http://localhost:5173')
-  })
-})
+    localStorage.setItem('loggedBlogListappUser', JSON.stringify(body));
+    cy.visit('http://localhost:5173');
+  });
+});
 
 Cypress.Commands.add('createBlog', ({ title, author, url }) => {
   cy.request({
@@ -39,9 +40,9 @@ Cypress.Commands.add('createBlog', ({ title, author, url }) => {
     method: 'POST',
     body: { title, author, url },
     headers: {
-      'Authorization': `Bearer ${JSON.parse(localStorage.getItem('loggedBlogListappUser')).token}`
+      Authorization: `Bearer ${JSON.parse(localStorage.getItem('loggedBlogListappUser')).token}`
     }
-  })
+  });
 
-  cy.visit('http://localhost:5173')
-})
+  cy.visit('http://localhost:5173');
+});
