@@ -3,10 +3,9 @@ import { filterChange } from '../reducers/filterReducer';
 
 const Filter = () => {
   const dispatch = useDispatch();
-
   const handleChange = (event) => {
-    const filter = event.target.value;
-    dispatch(filterChange(filter));
+    const action = filterChange(event.target.value);
+    dispatch(action);
   };
   const style = {
     marginBottom: 10
