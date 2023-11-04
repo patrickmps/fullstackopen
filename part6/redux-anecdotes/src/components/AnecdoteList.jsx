@@ -7,7 +7,7 @@ const AnecdoteList = () => {
     filter.trim().length === 0
       ? anecdotes
       : anecdotes.filter((anecdote) =>
-          anecdote.content.toLowerCase().includes(filter.toLowerCase())
+          anecdote.content?.toLowerCase().includes(filter.toLowerCase())
         )
   );
 
