@@ -10,5 +10,14 @@ const notificationSlice = createSlice({
   }
 });
 
+export const setNotification = (message, secounds = 5) => {
+  return async (dispatch) => {
+    dispatch(notificationChange(message));
+    setTimeout(() => {
+      dispatch(notificationChange(''));
+    }, secounds * 1000);
+  };
+};
+
 export const { notificationChange } = notificationSlice.actions;
 export default notificationSlice.reducer;
