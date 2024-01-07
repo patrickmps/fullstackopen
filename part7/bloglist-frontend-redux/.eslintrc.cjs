@@ -23,6 +23,6 @@ module.exports = {
     'cypress/no-async-tests': 'error',
     'cypress/no-pause': 'error',
     'react/prop-types': 'off',
-    "react-hooks/exhaustive-deps": 'off'
+    'react-hooks/exhaustive-deps': 'off'
   }
 };

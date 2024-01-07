@@ -7,7 +7,7 @@ const blogSlice = createSlice({
   initialState,
   reducers: {
     setBlogs: (state, action) => action.payload,
-    addBlog: (state, action) => state.blogs?.push(action.payload),
+    addBlog: (state, action) => state.concat(action.payload),
     updateBlog: (state, action) =>
       state.map((b) => (b.id !== action.payload.id ? b : action.payload)),
     removeBlog: (state, action) => state.filter((b) => b.id !== action.payload)

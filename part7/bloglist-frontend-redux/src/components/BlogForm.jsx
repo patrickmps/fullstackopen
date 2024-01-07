@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useField } from '../hooks';
 
 export const BlogForm = ({ createBlog }) => {
-  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
-
-  const handleBlogChange = (event) => {
-    setNewBlog({ ...newBlog, [event.target.name]: event.target.value });
-  };
+  const title = useField('text', 'title', 'Write the blog title here');
+  const author = useField('text', 'author', 'Insert blog author here');
+  const url = useField('text', 'url', 'Write the blog address here');
 
   const addBlog = (event) => {
     event.preventDefault();
-    createBlog(newBlog);
+    createBlog({
+      title: title.value,
+      author: author.value,
+      url: url.value
+    });
 
-    setNewBlog('');
+    title.onReset();
+    author.onReset();
+    url.onReset();
   };
 
   return (
@@ -21,36 +25,15 @@ export const BlogForm = ({ createBlog }) => {
       <form onSubmit={addBlog}>
         <div>
           title
-          <input
-            id="input-title"
-            placeholder="Write the blog title here"
-            type="text"
-            value={newBlog.title || ''}
-            name="title"
-            onChange={handleBlogChange}
-          />
+          <input {...title} />
         </div>
         <div>
           author
-          <input
-            id="input-author"
-            placeholder="Insert blog author here"
-            type="text"
-            value={newBlog.author || ''}
-            name="author"
-            onChange={handleBlogChange}
-          />
+          <input {...author} />
         </div>
         <div>
           url
-          <input
-            id="input-url"
-            placeholder="Write the blog address here"
-            type="text"
-            value={newBlog.url || ''}
-            name="url"
-            onChange={handleBlogChange}
-          />
+          <input {...url} />
         </div>
         <button type="submit">create</button>
       </form>
