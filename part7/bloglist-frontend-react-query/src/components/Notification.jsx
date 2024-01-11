@@ -1,21 +1,14 @@
-export const Notification = ({ message }) => {
-  if (message === null) {
-    return null;
-  }
+import { useContext } from 'react';
+import NotificationContext from '../contexts/NotificationContext';
+
+export const Notification = () => {
+  const [notification] = useContext(NotificationContext);
 
   const style = {
-    color: message.success ? 'green' : 'red',
-    background: 'lightgrey',
-    fontSize: '20px',
-    borderStyle: 'solid',
-    borderRadius: '5px',
-    padding: '10px',
-    marginBottom: '10px'
+    border: 'solid',
+    padding: 10,
+    borderWidth: 1
   };
 
-  return (
-    <div style={style} className="notification">
-      {message.text}
-    </div>
-  );
+  return notification.message && <div style={style}>{notification.message}</div>;
 };
