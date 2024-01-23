@@ -1,96 +1,87 @@
-import { useState } from "react";
+import { Link, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { Authors } from "./components/Authors";
 import { Books } from "./components/Books";
 import { NewBook } from "./components/NewBook";
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED } from "./queries";
+import { useApolloClient, useQuery, useSubscription } from "@apollo/client";
+import { useState } from "react";
+import Notify from "./components/Notify";
+import { LoginForm } from "./components/LoginForm";
+import { Recommended } from "./components/Recommended";
 
-import { gql, useMutation, useQuery } from "@apollo/client";
+export const updateCache = (cache, query, addedBook) => {
+	const uniqByTitle = (a) => {
+		let seen = new Set();
+		return a.filter((item) => {
+			let k = item.title;
+			return seen.has(k) ? false : seen.add(k);
+		});
+	};
 
-const ALL_AUTHORS = gql`
-	query {
-		allAuthors {
-			name
-			born
-			bookCount
-			id
-		}
-	}
-`;
-
-const ALL_BOOKS = gql`
-	query {
-		allBooks {
-			title
-			author
-			published
-			genres
-			id
-		}
-	}
-`;
-
-const ADD_BOOK = gql`
-	mutation (
-		$title: String!
-		$published: Int!
-		$author: String!
-		$genres: [String!]!
-	) {
-		addBook(
-			title: $title
-			published: $published
-			author: $author
-			genres: $genres
-		) {
-			author
-			genres
-			id
-			published
-			title
-		}
-	}
-`;
-
-const EDIT_AUTHOR = gql`
-	mutation ($name: String!, $setBornTo: Int!) {
-		editAuthor(name: $name, setBornTo: $setBornTo) {
-			name
-			id
-			bookCount
-			born
-		}
-	}
-`;
+	cache.updateQuery(query, ({ allBooks }) => {
+		return {
+			allBooks: uniqByTitle(allBooks.concat(addedBook)),
+		};
+	});
+};
 
 const App = () => {
-	const [page, setPage] = useState("authors");
+	const client = useApolloClient();
+	const [token, setToken] = useState(null);
+	const [errorMessage, setErrorMessage] = useState(null);
 	const authors = useQuery(ALL_AUTHORS);
 	const books = useQuery(ALL_BOOKS);
-	const [addBook] = useMutation(ADD_BOOK, {
-		refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
-	});
-	const [editAuthor] = useMutation(EDIT_AUTHOR, {
-		refetchQueries: [{ query: ALL_AUTHORS }],
+
+	const notify = (message) => {
+		setErrorMessage(message);
+		setTimeout(() => {
+			setErrorMessage(null);
+		}, 10000);
+	};
+
+	const logout = () => {
+		setToken(null);
+		localStorage.clear();
+		client.resetStore();
+	};
+
+	useSubscription(BOOK_ADDED, {
+		onData: ({ data, client }) => {
+			const addedBook = data.data.bookAdded;
+			notify(`${addedBook.title} added`);
+			updateCache(client.cache, { query: ALL_BOOKS }, addedBook);
+		},
 	});
 
-	return (
-		<div>
+	return !token ? (
+		<>
+			<Notify errorMessage={errorMessage} />
+			<LoginForm setToken={setToken} setError={notify} />
+		</>
+	) : (
+		<>
 			<div>
-				<button onClick={() => setPage("authors")}>authors</button>
-				<button onClick={() => setPage("books")}>books</button>
-				<button onClick={() => setPage("add")}>add book</button>
+				<Link to="/authors">authors</Link>
+				<Link to="/">books</Link>
+				<Link to="/add-book">add book</Link>
+				<Link to="/recommendations">recommended</Link>
+				<a onClick={logout}>logout</a>
 			</div>
-
-			<Authors
-				show={page === "authors"}
-				authors={authors}
-				editAuthor={editAuthor}
-			/>
-
-			<Books show={page === "books"} books={books} />
-
-			<NewBook show={page === "add"} addBook={addBook} />
-		</div>
+			<Notify errorMessage={errorMessage} />
+			<Routes>
+				<Route path="/" element={<Books books={books} />} />
+				<Route
+					path="/authors"
+					element={<Authors authors={authors} setError={setErrorMessage} />}
+				/>
+				<Route
+					path="/add-book"
+					element={<NewBook setError={setErrorMessage} />}
+				/>
+				<Route path="/recommendations" element={<Recommended />} />
+			</Routes>
+		</>
 	);
 };
 

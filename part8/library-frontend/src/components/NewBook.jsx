@@ -1,20 +1,26 @@
+import { useMutation } from "@apollo/client";
 import { useState } from "react";
+import { ADD_BOOK } from "../queries";
 
-export const NewBook = (props) => {
+export const NewBook = ({ setError }) => {
 	const [title, setTitle] = useState("");
 	const [author, setAuthor] = useState("");
 	const [published, setPublished] = useState(0);
 	const [genre, setGenre] = useState("");
 	const [genres, setGenres] = useState([]);
 
-	if (!props.show) {
-		return null;
-	}
+	const [addBook] = useMutation(ADD_BOOK, {
+		onError: (error) => {
+			const messages = error.graphQLErrors.map((e) => e.message).join("\n");
+			setError(messages);
+		},
+		updateQueries: ["allBooks"],
+	});
 
 	const submit = async (event) => {
 		event.preventDefault();
 
-		props.addBook({ variables: { title, published, author, genres } });
+		addBook({ variables: { title, published, author, genres } });
 
 		setTitle("");
 		setPublished("");

@@ -1,21 +1,27 @@
+import { useMutation } from "@apollo/client";
 import { useState } from "react";
+import { ALL_AUTHORS, EDIT_AUTHOR } from "../queries";
 
-export const Authors = (props) => {
+export const Authors = ({ authors, setError }) => {
 	const [name, setName] = useState("");
 	const [born, setBorn] = useState(0);
 
-	if (!props.show) {
-		return null;
-	}
+	const [editAuthor] = useMutation(EDIT_AUTHOR, {
+		onError: (error) => {
+			const messages = error.graphQLErrors.map((e) => e.message).join("\n");
+			setError(messages);
+		},
+		refetchQueries: [{ query: ALL_AUTHORS }],
+	});
 
-	if (props?.authors?.loading) {
+	if (authors?.loading) {
 		return <p>...loading</p>;
 	}
 
 	const submit = async (event) => {
 		event.preventDefault();
 
-		props.editAuthor({ variables: { name, setBornTo: born } });
+		editAuthor({ variables: { name, setBornTo: born } });
 
 		setName("");
 		setBorn(0);
@@ -29,13 +35,11 @@ export const Authors = (props) => {
 					<tr>
 						<th></th>
 						<th>born</th>
-						<th>books</th>
 					</tr>
-					{props.authors.data.allAuthors.map((a) => (
-						<tr key={a.id}>
+					{authors?.data.allAuthors.map((a, index) => (
+						<tr key={index}>
 							<td>{a.name}</td>
 							<td>{a.born}</td>
-							<td>{a.bookCount}</td>
 						</tr>
 					))}
 				</tbody>
@@ -44,8 +48,8 @@ export const Authors = (props) => {
 			<h2>Set birthyear</h2>
 			<form onSubmit={submit}>
 				<select value={name} onChange={(event) => setName(event.target.value)}>
-					{props.authors.data.allAuthors.map((a) => (
-						<option key={a.id} value={a.name}>
+					{authors.data.allAuthors.map((a, index) => (
+						<option key={index} value={a.name}>
 							{a.name}
 						</option>
 					))}
