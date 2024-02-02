@@ -1,25 +1,29 @@
 import { useField } from "../hooks";
-import { NewDiaryFlightTypes } from "../types";
+import { NewDiaryFlightTypes, Visibility, Weather } from "../types";
+
+type DiaryFlightFormTypes = {
+	addDiaryFlight: (object: NewDiaryFlightTypes) => void;
+	error: string | null;
+};
 
 export const DiaryFlightForm = ({
 	addDiaryFlight,
-}: {
-	addDiaryFlight: (object: NewDiaryFlightTypes) => void;
-}) => {
+	error,
+}: DiaryFlightFormTypes) => {
 	const date = useField({
-		type: "text",
+		type: "date",
 		name: "date",
 		placeholder: "YYYY-MM-DD",
 	});
+
 	const visibility = useField({
-		type: "text",
+		type: "radio",
 		name: "visibility",
-		placeholder: "How was the visibility?",
 	});
+
 	const weather = useField({
-		type: "text",
+		type: "radio",
 		name: "weather",
-		placeholder: "How was the weather?",
 	});
 	const comment = useField({
 		type: "text",
@@ -32,30 +36,47 @@ export const DiaryFlightForm = ({
 
 		const newDiaryFlight: NewDiaryFlightTypes = {
 			date: date.value,
-			visibility: visibility.value,
-			weather: weather.value,
+			visibility: visibility.value as Visibility,
+			weather: weather.value as Weather,
 			comment: comment.value,
 		};
 
 		addDiaryFlight(newDiaryFlight);
 	};
 
+	const style: { color: string } = {
+		color: "red",
+	};
+
+	console.log(Object.values(Visibility));
+
 	return (
 		<>
 			<h1>New Diary</h1>
+			{error && <p style={style}>{error}</p>}
 			<form onSubmit={handleSubmit}>
 				<div>
 					<label htmlFor="date">Date</label>
 					<input {...date} />
 				</div>
-				<div>
-					<label htmlFor="visibility">Visibility</label>
-					<input {...visibility} />
-				</div>
-				<div>
-					<label htmlFor="weather">Weather</label>
-					<input {...weather} />
-				</div>
+				<fieldset>
+					<legend>Visibility</legend>
+					{Object.entries(Visibility).map((v, index) => (
+						<label key={index} htmlFor={v[0]}>
+							{v[0]}
+							<input {...visibility} value={v[1]} />
+						</label>
+					))}
+				</fieldset>
+				<fieldset>
+					<legend>Weather</legend>
+					{Object.entries(Weather).map((v, index) => (
+						<label key={index} htmlFor={v[0]}>
+							{v[0]}
+							<input {...weather} value={v[1]} />
+						</label>
+					))}
+				</fieldset>
 				<div>
 					<label htmlFor="comment">Comment</label>
 					<input {...comment} />
