@@ -5,6 +5,7 @@ import {
 	NewPatientTypes,
 } from "../types";
 import { v1 as uuid } from "uuid";
+import utils from "../utils";
 const id = uuid();
 
 const getPatients = (): PatientTypes[] => {
@@ -26,6 +27,8 @@ const getNonSensitivePatients = (): NonSensitivePatientTypes[] => {
 };
 
 const addPatient = (patient: NewPatientTypes): PatientTypes => {
+	patient = utils.toNewPatient(patient);
+
 	const newPatient = {
 		id,
 		...patient,
